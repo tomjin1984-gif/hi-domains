@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { UserProfile } from "@/lib/user";
 import type { DomainAnalysis } from "@/types/domain";
 
 const sidebarItems = [
@@ -18,6 +19,10 @@ export type StatCardProps = {
 
 export type AnalysisCardProps = {
   analysis: DomainAnalysis;
+};
+
+export type DashboardHeaderProps = {
+  profile: UserProfile | null;
 };
 
 export function DashboardSidebar() {
@@ -72,7 +77,10 @@ export function DashboardSidebar() {
   );
 }
 
-export function DashboardHeader() {
+export function DashboardHeader({ profile }: DashboardHeaderProps) {
+  const profileLabel = getProfileLabel(profile);
+  const profileInitials = getProfileInitials(profileLabel);
+
   return (
     <header className="flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8">
       <div>
@@ -90,16 +98,47 @@ export function DashboardHeader() {
         <IconButton label="Notifications">
           <span className="relative block h-4 w-3 rounded-t-full border-2 border-slate-600 after:absolute after:-bottom-1 after:left-1/2 after:size-1.5 after:-translate-x-1/2 after:rounded-full after:bg-slate-600" />
         </IconButton>
+        <div className="hidden min-w-0 text-right sm:block">
+          <p className="max-w-56 truncate text-sm font-semibold text-slate-950">
+            {profileLabel}
+          </p>
+        </div>
         <button
           type="button"
-          aria-label="User profile"
+          aria-label={`User profile: ${profileLabel}`}
           className="flex size-10 items-center justify-center rounded-lg bg-slate-950 text-sm font-semibold text-white"
         >
-          HD
+          {profileInitials}
         </button>
       </div>
     </header>
   );
+}
+
+function getProfileLabel(profile: UserProfile | null) {
+  const fullName = profile?.full_name?.trim();
+
+  if (fullName) {
+    return fullName;
+  }
+
+  if (profile?.email) {
+    return profile.email;
+  }
+
+  return "Signed in user";
+}
+
+function getProfileInitials(label: string) {
+  const namePart = label.includes("@") ? label.split("@")[0] : label;
+  const initials = namePart
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+
+  return initials || "HD";
 }
 
 function IconButton({

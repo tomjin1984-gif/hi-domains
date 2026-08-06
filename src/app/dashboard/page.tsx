@@ -9,6 +9,7 @@ import {
   WelcomeCard,
 } from "@/components/dashboard";
 import { exampleAnalyses } from "@/data/example-analysis";
+import { getCurrentUserProfile } from "@/lib/user";
 
 const stats = [
   { label: "Total Domains", value: "128", accent: "teal" as const },
@@ -20,13 +21,15 @@ const opportunities = ["Agent", "Memory", "Robotics", "AI Infrastructure"];
 
 const activities = ["Domain analyzed", "Portfolio updated", "Report generated"];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const profile = await getCurrentUserProfile();
+
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="lg:flex">
         <DashboardSidebar />
         <div className="min-w-0 flex-1">
-          <DashboardHeader />
+          <DashboardHeader profile={profile} />
           <main className="px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-7xl space-y-6">
               <WelcomeCard />
