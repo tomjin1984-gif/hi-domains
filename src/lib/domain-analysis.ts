@@ -112,6 +112,9 @@ function parseDomainAnalysisRow(value: unknown): LatestDomainAnalysis | null {
   };
 }
 
+const domainAnalysisSelectFields =
+  "id, domain_id, score, valuation, brand_score, seo_score, memorability_score, trend_score, extension_quality, keyword_value, buyer_profile, risks, investment_thesis, ai_summary, created_at";
+
 export async function getLatestDomainAnalysis(
   domainId: string,
 ): Promise<LatestDomainAnalysis | null> {
@@ -125,9 +128,7 @@ export async function getLatestDomainAnalysis(
 
   const { data, error } = await supabase
     .from("domain_analysis")
-    .select(
-      "id, domain_id, score, valuation, brand_score, seo_score, memorability_score, trend_score, extension_quality, keyword_value, buyer_profile, risks, investment_thesis, ai_summary, created_at",
-    )
+    .select(domainAnalysisSelectFields)
     .eq("domain_id", normalizedDomainId)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -138,4 +139,32 @@ export async function getLatestDomainAnalysis(
   }
 
   return parseDomainAnalysisRow(data);
+}
+
+export async function getDomainAnalysisHistory(
+  domainId: string,
+): Promise<LatestDomainAnalysis[]> {
+  const normalizedDomainId = domainId.trim();
+
+  if (!normalizedDomainId) {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("domain_analysis")
+    .select(domainAnalysisSelectFields)
+    .eq("domain_id", normalizedDomainId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  const rows: unknown[] = Array.isArray(data) ? data : [];
+
+  return rows
+    .map((row) => parseDomainAnalysisRow(row))
+    .filter((analysis): analysis is LatestDomainAnalysis => analysis !== null);
 }

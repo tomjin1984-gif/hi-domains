@@ -4,7 +4,10 @@ import {
   DashboardHeader,
   DashboardSidebar,
 } from "@/components/dashboard";
-import { getLatestDomainAnalysis } from "@/lib/domain-analysis";
+import {
+  getDomainAnalysisHistory,
+  getLatestDomainAnalysis,
+} from "@/lib/domain-analysis";
 import type { LatestDomainAnalysis } from "@/lib/domain-analysis";
 import { getUserDomainById } from "@/lib/domains";
 import type { Domain } from "@/lib/domains";
@@ -23,7 +26,10 @@ export default async function DomainDetailPage({
     notFound();
   }
 
-  const analysis = await getLatestDomainAnalysis(domain.id);
+  const [analysis, analysisHistory] = await Promise.all([
+    getLatestDomainAnalysis(domain.id),
+    getDomainAnalysisHistory(domain.id),
+  ]);
   const extension = formatExtension(domain);
   const fullDomain = formatFullDomain(domain, extension);
 
@@ -81,10 +87,68 @@ export default async function DomainDetailPage({
                   <DomainAnalysisReport analysis={analysis} />
                 </article>
               </section>
+
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-950">
+                      Analysis History
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Recent AI analysis snapshots for this domain.
+                    </p>
+                  </div>
+                  <span className="w-fit rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 ring-1 ring-teal-100">
+                    {analysisHistory.length} records
+                  </span>
+                </div>
+                <AnalysisHistory records={analysisHistory} />
+              </section>
             </div>
           </main>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AnalysisHistory({ records }: { records: LatestDomainAnalysis[] }) {
+  if (records.length === 0) {
+    return <p className="mt-5 text-sm font-medium text-slate-500">No analysis yet</p>;
+  }
+
+  return (
+    <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
+      <div className="hidden grid-cols-5 gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid">
+        <p>Created</p>
+        <p>Score</p>
+        <p>Valuation</p>
+        <p>Brand Score</p>
+        <p>Trend Score</p>
+      </div>
+      <div className="divide-y divide-slate-200">
+        {records.map((record) => (
+          <div
+            key={record.id}
+            className="grid gap-3 px-4 py-4 text-sm md:grid-cols-5 md:items-center md:gap-4"
+          >
+            <HistoryMetric label="Created" value={formatDateTime(record.created_at)} />
+            <HistoryMetric label="Score" value={formatScore(record.score)} />
+            <HistoryMetric label="Valuation" value={formatValuation(record.valuation)} />
+            <HistoryMetric label="Brand Score" value={formatScore(record.brand_score)} />
+            <HistoryMetric label="Trend Score" value={formatScore(record.trend_score)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HistoryMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-slate-500 md:hidden">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-800 md:mt-0">{value}</p>
     </div>
   );
 }
@@ -222,4 +286,20 @@ function formatScore(value: number) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
