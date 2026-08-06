@@ -10,6 +10,7 @@ import {
   StatCard,
   WelcomeCard,
 } from "@/components/dashboard";
+import { getLatestDomainAnalysis } from "@/lib/domain-analysis";
 import { getUserDomains } from "@/lib/domains";
 import { getCurrentUserProfile } from "@/lib/user";
 
@@ -30,6 +31,9 @@ export default async function DashboardPage() {
     getCurrentUserProfile(),
     getUserDomains(),
   ]);
+  const domainAnalyses = await Promise.all(
+    domains.map((domain) => getLatestDomainAnalysis(domain.id)),
+  );
   const stats = getStats(domains.length);
 
   return (
@@ -72,7 +76,13 @@ export default async function DashboardPage() {
                   </div>
                   <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-1">
                     {domains.length > 0 ? (
-                      domains.map((domain) => <DomainCard key={domain.id} domain={domain} />)
+                      domains.map((domain, index) => (
+                        <DomainCard
+                          key={domain.id}
+                          domain={domain}
+                          analysis={domainAnalyses[index] ?? null}
+                        />
+                      ))
                     ) : (
                       <DomainEmptyState />
                     )}

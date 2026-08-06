@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AddDomain } from "@/components/add-domain";
 import { DomainAnalyzeButton } from "@/components/domain-analyze-button";
 import { DomainAnalyzer } from "@/components/domain-analyzer";
+import type { LatestDomainAnalysis } from "@/lib/domain-analysis";
 import type { Domain } from "@/lib/domains";
 import type { UserProfile } from "@/lib/user";
 import type { DomainAnalysis } from "@/types/domain";
@@ -27,6 +28,7 @@ export type AnalysisCardProps = {
 
 export type DomainCardProps = {
   domain: Domain;
+  analysis: LatestDomainAnalysis | null;
 };
 
 export type DashboardHeaderProps = {
@@ -274,7 +276,7 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
   );
 }
 
-export function DomainCard({ domain }: DomainCardProps) {
+export function DomainCard({ domain, analysis }: DomainCardProps) {
   const extension = formatExtension(domain);
   const fullDomain = formatFullDomain(domain, extension);
   const status = formatStatus(domain.status);
@@ -297,8 +299,50 @@ export function DomainCard({ domain }: DomainCardProps) {
         <p className="text-xs font-medium text-slate-500">Added</p>
         <p className="mt-1 text-sm font-semibold text-slate-700">{createdAt}</p>
       </div>
+      <DomainAnalysisSnapshot analysis={analysis} />
       <DomainAnalyzeButton domain={domain.domain} displayDomain={fullDomain} />
     </article>
+  );
+}
+
+function DomainAnalysisSnapshot({
+  analysis,
+}: {
+  analysis: LatestDomainAnalysis | null;
+}) {
+  if (!analysis) {
+    return (
+      <div className="mt-5 border-t border-slate-100 pt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Latest Analysis
+        </p>
+        <p className="mt-3 text-sm font-medium text-slate-500">No analysis yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 border-t border-slate-100 pt-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Latest Analysis
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-4">
+        <AnalysisMetric label="Score" value={formatScore(analysis.score)} />
+        <AnalysisMetric label="Valuation" value={formatValuation(analysis.valuation)} />
+        <AnalysisMetric label="Brand" value={formatScore(analysis.brand_score)} />
+        <AnalysisMetric label="SEO" value={formatScore(analysis.seo_score)} />
+      </div>
+      <p className="mt-4 text-sm leading-6 text-slate-600">{analysis.ai_summary}</p>
+    </div>
+  );
+}
+
+function AnalysisMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold text-slate-950">{value}</p>
+    </div>
   );
 }
 
@@ -321,6 +365,20 @@ function formatCurrencyRange(currency: string, min: number, max: number) {
   });
 
   return `${formatter.format(min)} - ${formatter.format(max)}`;
+}
+
+function formatValuation(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatScore(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
 function formatExtension(domain: Domain) {
