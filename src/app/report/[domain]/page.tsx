@@ -1,22 +1,79 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { ReportShare } from "@/components/report-share";
 import { getLatestDomainAnalysis } from "@/lib/domain-analysis";
 import type { LatestDomainAnalysis } from "@/lib/domain-analysis";
 import { getPublicDomainByName } from "@/lib/domains";
 import type { PublicDomain } from "@/lib/domains";
 
+type PublicReportData = {
+  domain: PublicDomain;
+  analysis: LatestDomainAnalysis | null;
+  extension: string;
+  fullDomain: string;
+};
+
+const siteUrl = "https://hi.domains";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/report/[domain]">): Promise<Metadata> {
+  const { domain: domainParam } = await params;
+  const report = await getPublicReportData(domainParam);
+
+  if (!report) {
+    return {
+      title: "Domain report not found | hi.domains",
+      description: "Domain report not found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const { analysis, fullDomain } = report;
+  const title = `${fullDomain} AI Domain Valuation Report | hi.domains`;
+  const description = analysis
+    ? `${fullDomain} AI score ${formatScore(analysis.score)} with ${formatValuation(
+        analysis.valuation,
+      )} valuation and domain analysis from hi.domains.`
+    : `${fullDomain} AI domain valuation report with domain analysis from hi.domains.`;
+  const url = `/report/${encodeURIComponent(fullDomain)}`;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: "hi.domains",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
 export default async function PublicDomainReportPage({
   params,
 }: PageProps<"/report/[domain]">) {
   const { domain: domainParam } = await params;
-  const domain = await getPublicDomainByName(domainParam);
+  const report = await getPublicReportData(domainParam);
 
-  if (!domain) {
+  if (!report) {
     return <ReportNotFound />;
   }
 
-  const analysis = await getLatestDomainAnalysis(domain.id);
-  const extension = formatExtension(domain);
-  const fullDomain = formatFullDomain(domain, extension);
+  const { analysis, domain, extension, fullDomain } = report;
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
@@ -40,6 +97,7 @@ export default async function PublicDomainReportPage({
               <HeaderMetric label="Extension" value={extension} />
               <HeaderMetric label="Status" value={formatStatus(domain.status)} />
             </div>
+            <ReportShare title={fullDomain} />
           </div>
         </section>
 
@@ -50,6 +108,25 @@ export default async function PublicDomainReportPage({
       </div>
     </main>
   );
+}
+
+async function getPublicReportData(domainParam: string): Promise<PublicReportData | null> {
+  const domain = await getPublicDomainByName(domainParam);
+
+  if (!domain) {
+    return null;
+  }
+
+  const analysis = await getLatestDomainAnalysis(domain.id);
+  const extension = formatExtension(domain);
+  const fullDomain = formatFullDomain(domain, extension);
+
+  return {
+    domain,
+    analysis,
+    extension,
+    fullDomain,
+  };
 }
 
 function ReportNotFound() {
