@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DomainAnalyzer } from "@/components/domain-analyzer";
 import type { Domain } from "@/lib/domains";
 import type { UserProfile } from "@/lib/user";
 import type { DomainAnalysis } from "@/types/domain";
@@ -195,31 +196,14 @@ export function WelcomeCard() {
 export function AnalyzeCard() {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-950">Analyze a Domain</p>
           <p className="mt-1 text-sm text-slate-500">
             Prepare an AI analysis request from the dashboard shell.
           </p>
         </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <label className="sr-only" htmlFor="quick-domain">
-            Domain
-          </label>
-          <input
-            id="quick-domain"
-            name="quick-domain"
-            type="text"
-            defaultValue="example.ai"
-            className="min-h-11 w-full rounded-lg border border-slate-200 px-3 text-sm text-slate-950 outline-none transition focus:border-teal-300 focus:ring-4 focus:ring-teal-100 sm:w-64"
-          />
-          <button
-            type="button"
-            className="min-h-11 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Analyze Domain
-          </button>
-        </div>
+        <DomainAnalyzer />
       </div>
     </section>
   );
