@@ -63,7 +63,9 @@ export default async function DashboardPage() {
               <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
                 <div>
                   <div className="mb-4">
-                    <h2 className="text-lg font-semibold text-slate-950">Recent Domains</h2>
+                    <h2 className="text-lg font-semibold text-slate-950">
+                      My Domains Portfolio
+                    </h2>
                     <p className="mt-1 text-sm text-slate-500">
                       Domains from your active portfolio.
                     </p>

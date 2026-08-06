@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AddDomain } from "@/components/add-domain";
+import { DomainAnalyzeButton } from "@/components/domain-analyze-button";
 import { DomainAnalyzer } from "@/components/domain-analyzer";
 import type { Domain } from "@/lib/domains";
 import type { UserProfile } from "@/lib/user";
@@ -95,7 +96,7 @@ export function DashboardHeader({ profile }: DashboardHeaderProps) {
           Command Center
         </p>
         <p className="mt-1 text-sm text-slate-600">
-          Static dashboard preview for domain investment workflows.
+          Manage your domain portfolio and AI analysis workflow.
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -275,6 +276,7 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
 
 export function DomainCard({ domain }: DomainCardProps) {
   const extension = formatExtension(domain);
+  const fullDomain = formatFullDomain(domain, extension);
   const status = formatStatus(domain.status);
   const createdAt = formatDate(domain.created_at);
 
@@ -282,7 +284,7 @@ export function DomainCard({ domain }: DomainCardProps) {
     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold text-slate-950">{domain.domain}</h3>
+          <h3 className="truncate font-semibold text-slate-950">{fullDomain}</h3>
           <p className="mt-2 text-sm text-slate-500">Extension:</p>
           <p className="mt-1 text-sm font-semibold text-slate-700">{extension}</p>
         </div>
@@ -295,6 +297,7 @@ export function DomainCard({ domain }: DomainCardProps) {
         <p className="text-xs font-medium text-slate-500">Added</p>
         <p className="mt-1 text-sm font-semibold text-slate-700">{createdAt}</p>
       </div>
+      <DomainAnalyzeButton domain={domain.domain} displayDomain={fullDomain} />
     </article>
   );
 }
@@ -328,6 +331,14 @@ function formatExtension(domain: Domain) {
   const extension = domain.domain.split(".").pop();
 
   return extension && extension !== domain.domain ? `.${extension}` : "Unknown";
+}
+
+function formatFullDomain(domain: Domain, extension: string) {
+  if (extension === "Unknown" || domain.domain.endsWith(extension)) {
+    return domain.domain;
+  }
+
+  return `${domain.domain}${extension}`;
 }
 
 function formatStatus(status: string) {
