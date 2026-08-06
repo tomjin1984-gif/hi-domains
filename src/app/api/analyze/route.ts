@@ -111,6 +111,13 @@ export async function POST(request: Request) {
     valuation: analysis.valuation,
     brand_score: analysis.brand_score,
     seo_score: analysis.seo_score,
+    memorability_score: analysis.memorability_score,
+    trend_score: analysis.trend_score,
+    extension_quality: analysis.extension_quality,
+    keyword_value: analysis.keyword_value,
+    buyer_profile: analysis.buyer_profile,
+    risks: analysis.risks,
+    investment_thesis: analysis.investment_thesis,
     ai_summary: analysis.summary,
   });
 

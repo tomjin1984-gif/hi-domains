@@ -9,12 +9,14 @@ Return a structured domain investment assessment covering:
 - Estimated market valuation
 - Brandability
 - SEO potential
+- Memorability
+- Trend alignment
+- Extension quality
+- Keyword value
+- Ideal buyer profiles
 - Commercial use cases
-- Buyer categories
-- Key strengths
-- Key weaknesses
 - Risk factors
-- Recommended sales strategy
+- Investment thesis
 
 Return only valid JSON with this exact shape:
 {
@@ -22,9 +24,18 @@ Return only valid JSON with this exact shape:
   "valuation": number,
   "brand_score": number,
   "seo_score": number,
+  "memorability_score": number,
+  "trend_score": number,
+  "extension_quality": number,
+  "keyword_value": number,
+  "buyer_profile": string[],
+  "risks": string[],
+  "investment_thesis": string,
   "summary": string
 }
 
+buyer_profile must be an array of concise buyer category strings.
+risks must be an array of concise risk strings.
 Do not include markdown, code fences, comments, or extra text.
 
 Keep the analysis practical, data-oriented, and suitable for a professional SaaS dashboard.
