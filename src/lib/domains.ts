@@ -70,3 +70,35 @@ export async function getUserDomains(): Promise<Domain[]> {
     .map((row) => parseDomainRow(row))
     .filter((domain): domain is Domain => domain !== null);
 }
+
+export async function getUserDomainById(domainId: string): Promise<Domain | null> {
+  const normalizedDomainId = domainId.trim();
+
+  if (!normalizedDomainId) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("domains")
+    .select("id, user_id, domain, extension, status, created_at")
+    .eq("id", normalizedDomainId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return parseDomainRow(data);
+}

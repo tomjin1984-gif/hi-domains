@@ -286,7 +286,14 @@ export function DomainCard({ domain, analysis }: DomainCardProps) {
     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold text-slate-950">{fullDomain}</h3>
+          <h3 className="truncate font-semibold">
+            <Link
+              href={`/domains/${domain.id}`}
+              className="text-slate-950 transition hover:text-teal-700"
+            >
+              {fullDomain}
+            </Link>
+          </h3>
           <p className="mt-2 text-sm text-slate-500">Extension:</p>
           <p className="mt-1 text-sm font-semibold text-slate-700">{extension}</p>
         </div>
