@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AddDomain } from "@/components/add-domain";
 import { DomainAnalyzer } from "@/components/domain-analyzer";
 import type { Domain } from "@/lib/domains";
 import type { UserProfile } from "@/lib/user";
@@ -204,6 +205,22 @@ export function AnalyzeCard() {
           </p>
         </div>
         <DomainAnalyzer />
+      </div>
+    </section>
+  );
+}
+
+export function AddDomainCard() {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-slate-950">Add Domain</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Add a complete domain to your active portfolio.
+          </p>
+        </div>
+        <AddDomain />
       </div>
     </section>
   );
