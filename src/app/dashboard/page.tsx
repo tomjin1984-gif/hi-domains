@@ -1,28 +1,35 @@
 import {
-  AnalysisCard,
   AnalyzeCard,
   DashboardHeader,
   DashboardSidebar,
+  DomainCard,
+  DomainEmptyState,
   OpportunityCard,
   RecentActivity,
   StatCard,
   WelcomeCard,
 } from "@/components/dashboard";
-import { exampleAnalyses } from "@/data/example-analysis";
+import { getUserDomains } from "@/lib/domains";
 import { getCurrentUserProfile } from "@/lib/user";
-
-const stats = [
-  { label: "Total Domains", value: "128", accent: "teal" as const },
-  { label: "Estimated Portfolio Value", value: "$420,000", accent: "amber" as const },
-  { label: "Needs Attention", value: "12", accent: "rose" as const },
-];
 
 const opportunities = ["Agent", "Memory", "Robotics", "AI Infrastructure"];
 
 const activities = ["Domain analyzed", "Portfolio updated", "Report generated"];
 
+function getStats(domainCount: number) {
+  return [
+    { label: "Total Domains", value: String(domainCount), accent: "teal" as const },
+    { label: "Estimated Portfolio Value", value: "$420,000", accent: "amber" as const },
+    { label: "Needs Attention", value: "12", accent: "rose" as const },
+  ];
+}
+
 export default async function DashboardPage() {
-  const profile = await getCurrentUserProfile();
+  const [profile, domains] = await Promise.all([
+    getCurrentUserProfile(),
+    getUserDomains(),
+  ]);
+  const stats = getStats(domains.length);
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -54,15 +61,17 @@ export default async function DashboardPage() {
               <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
                 <div>
                   <div className="mb-4">
-                    <h2 className="text-lg font-semibold text-slate-950">Recent Analysis</h2>
+                    <h2 className="text-lg font-semibold text-slate-950">Recent Domains</h2>
                     <p className="mt-1 text-sm text-slate-500">
-                      Recent domain valuation examples for the static dashboard.
+                      Domains from your active portfolio.
                     </p>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-1">
-                    {exampleAnalyses.map((analysis) => (
-                      <AnalysisCard key={analysis.domain} analysis={analysis} />
-                    ))}
+                    {domains.length > 0 ? (
+                      domains.map((domain) => <DomainCard key={domain.id} domain={domain} />)
+                    ) : (
+                      <DomainEmptyState />
+                    )}
                   </div>
                 </div>
 

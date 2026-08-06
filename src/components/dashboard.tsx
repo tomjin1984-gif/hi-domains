@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Domain } from "@/lib/domains";
 import type { UserProfile } from "@/lib/user";
 import type { DomainAnalysis } from "@/types/domain";
 
@@ -19,6 +20,10 @@ export type StatCardProps = {
 
 export type AnalysisCardProps = {
   analysis: DomainAnalysis;
+};
+
+export type DomainCardProps = {
+  domain: Domain;
 };
 
 export type DashboardHeaderProps = {
@@ -267,6 +272,43 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
   );
 }
 
+export function DomainCard({ domain }: DomainCardProps) {
+  const extension = formatExtension(domain);
+  const status = formatStatus(domain.status);
+  const createdAt = formatDate(domain.created_at);
+
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="truncate font-semibold text-slate-950">{domain.domain}</h3>
+          <p className="mt-2 text-sm text-slate-500">Extension:</p>
+          <p className="mt-1 text-sm font-semibold text-slate-700">{extension}</p>
+        </div>
+        <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 text-center">
+          <p className="text-xs font-medium text-teal-700">Status</p>
+          <p className="text-sm font-semibold text-slate-950">{status}</p>
+        </div>
+      </div>
+      <div className="mt-5 rounded-lg bg-slate-50 px-3 py-2">
+        <p className="text-xs font-medium text-slate-500">Added</p>
+        <p className="mt-1 text-sm font-semibold text-slate-700">{createdAt}</p>
+      </div>
+    </article>
+  );
+}
+
+export function DomainEmptyState() {
+  return (
+    <article className="rounded-xl border border-dashed border-slate-300 bg-white p-5 shadow-sm">
+      <h3 className="font-semibold text-slate-950">No domains yet</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-500">
+        Add domains to your portfolio table to see them here.
+      </p>
+    </article>
+  );
+}
+
 function formatCurrencyRange(currency: string, min: number, max: number) {
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -275,6 +317,39 @@ function formatCurrencyRange(currency: string, min: number, max: number) {
   });
 
   return `${formatter.format(min)} - ${formatter.format(max)}`;
+}
+
+function formatExtension(domain: Domain) {
+  if (domain.extension) {
+    return domain.extension.startsWith(".") ? domain.extension : `.${domain.extension}`;
+  }
+
+  const extension = domain.domain.split(".").pop();
+
+  return extension && extension !== domain.domain ? `.${extension}` : "Unknown";
+}
+
+function formatStatus(status: string) {
+  return status
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join(" ");
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
 }
 
 export function OpportunityCard({ keywords }: { keywords: string[] }) {
