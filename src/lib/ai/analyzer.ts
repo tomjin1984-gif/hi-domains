@@ -24,7 +24,9 @@ function parseDomainAnalyzerResult(content: string): DomainAnalyzerResult | null
 
   try {
     parsed = JSON.parse(content);
-  } catch {
+  } catch (error) {
+    console.error("JSON parse error:", error);
+    console.error("Raw AI response:", content);
     return null;
   }
 
@@ -45,6 +47,7 @@ function parseDomainAnalyzerResult(content: string): DomainAnalyzerResult | null
     seoScore === null ||
     typeof summary !== "string"
   ) {
+    console.error("Invalid AI result:", parsed);
     return null;
   }
 
@@ -85,11 +88,13 @@ export async function analyzeDomain(domain: string): Promise<DomainAnalyzerResul
     const content = completion.choices[0]?.message?.content;
 
     if (!content) {
+      console.error("AI response content is empty");
       return null;
     }
 
     return parseDomainAnalyzerResult(content);
-  } catch {
+  } catch (error) {
+    console.error("AI analyzer error:", error);
     return null;
   }
 }
