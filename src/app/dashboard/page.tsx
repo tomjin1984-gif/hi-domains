@@ -8,17 +8,12 @@ import {
   StatCard,
   WelcomeCard,
 } from "@/components/dashboard";
+import { exampleAnalyses } from "@/data/example-analysis";
 
 const stats = [
   { label: "Total Domains", value: "128", accent: "teal" as const },
   { label: "Estimated Portfolio Value", value: "$420,000", accent: "amber" as const },
   { label: "Needs Attention", value: "12", accent: "rose" as const },
-];
-
-const recentAnalysis = [
-  { domain: "chainscan.ai", score: 84, valueRange: "$7,500 - $25,000" },
-  { domain: "agentmemory.ai", score: 91, valueRange: "$20,000 - $80,000" },
-  { domain: "roboticslab.ai", score: 76, valueRange: "$3,000 - $12,000" },
 ];
 
 const opportunities = ["Agent", "Memory", "Robotics", "AI Infrastructure"];
@@ -62,8 +57,8 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-1">
-                    {recentAnalysis.map((analysis) => (
-                      <AnalysisCard key={analysis.domain} {...analysis} />
+                    {exampleAnalyses.map((analysis) => (
+                      <AnalysisCard key={analysis.domain} analysis={analysis} />
                     ))}
                   </div>
                 </div>
