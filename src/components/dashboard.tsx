@@ -324,24 +324,68 @@ function DomainAnalysisSnapshot({
   return (
     <div className="mt-5 border-t border-slate-100 pt-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        Latest Analysis
+        AI Intelligence
       </p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-4">
-        <AnalysisMetric label="Score" value={formatScore(analysis.score)} />
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AnalysisMetric label="Overall Score" value={formatScore(analysis.score)} />
         <AnalysisMetric label="Valuation" value={formatValuation(analysis.valuation)} />
-        <AnalysisMetric label="Brand" value={formatScore(analysis.brand_score)} />
-        <AnalysisMetric label="SEO" value={formatScore(analysis.seo_score)} />
+        <AnalysisMetric label="Brand Score" value={formatScore(analysis.brand_score)} />
+        <AnalysisMetric label="SEO Score" value={formatScore(analysis.seo_score)} />
+        <AnalysisMetric
+          label="Memorability Score"
+          value={formatScore(analysis.memorability_score)}
+        />
+        <AnalysisMetric label="Trend Score" value={formatScore(analysis.trend_score)} />
+        <AnalysisMetric
+          label="Extension Quality"
+          value={formatScore(analysis.extension_quality)}
+        />
+        <AnalysisMetric label="Keyword Value" value={formatScore(analysis.keyword_value)} />
       </div>
-      <p className="mt-4 text-sm leading-6 text-slate-600">{analysis.ai_summary}</p>
+      <AnalysisTextList title="Potential Buyers" items={analysis.buyer_profile} />
+      <AnalysisTextList title="Risk Analysis" items={analysis.risks} />
+      <AnalysisTextBlock title="Investment Thesis" value={analysis.investment_thesis} />
+      <AnalysisTextBlock title="Summary" value={analysis.ai_summary} />
     </div>
   );
 }
 
 function AnalysisMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function AnalysisTextList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="mt-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+      {items.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {items.map((item) => (
+            <span
+              key={item}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-slate-500">Not available</p>
+      )}
+    </div>
+  );
+}
+
+function AnalysisTextBlock({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="mt-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{value}</p>
     </div>
   );
 }
