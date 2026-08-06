@@ -16,6 +16,17 @@ Return a structured domain investment assessment covering:
 - Risk factors
 - Recommended sales strategy
 
+Return only valid JSON with this exact shape:
+{
+  "score": number,
+  "valuation": number,
+  "brand_score": number,
+  "seo_score": number,
+  "summary": string
+}
+
+Do not include markdown, code fences, comments, or extra text.
+
 Keep the analysis practical, data-oriented, and suitable for a professional SaaS dashboard.
 `.trim();
 
