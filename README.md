@@ -1,5 +1,7 @@
 # hi.domains
 
+> 管理员与经纪人后台已实现。入口、权限配置、订单流程和验证说明见 [后台使用文档](docs/ADMIN_BROKER.md)。下方为项目早期说明，部分功能状态已过时。
+
 AI Domain Intelligence Platform.
 
 This repository contains the first-stage website framework for `hi.domains`.

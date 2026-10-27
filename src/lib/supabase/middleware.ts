@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
+import { supabaseFetch } from "@/lib/supabase/fetch";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/admin", "/broker", "/orders"];
 const authRoutes = ["/login", "/signup"];
 
 function isRouteMatch(pathname: string, routes: string[]) {
@@ -33,6 +34,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   const supabase = createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+    global: { fetch: supabaseFetch },
     cookies: {
       getAll() {
         return request.cookies.getAll();

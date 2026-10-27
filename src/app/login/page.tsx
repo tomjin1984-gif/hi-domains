@@ -3,9 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AuthLayout } from "@/components/site-shell";
-import { createClient } from "@/lib/supabase/client";
 
 type AuthMessage = {
   type: "error" | "success";
@@ -33,7 +31,6 @@ function validateLoginForm(email: string, password: string): string | null {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<AuthMessage>(null);
@@ -53,23 +50,24 @@ export default function LoginPage() {
     setMessage(null);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        signal: AbortSignal.timeout(40_000),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
-
-      if (error) {
-        setMessage({ type: "error", text: error.message });
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage({ type: "error", text: result.error ?? "登录失败，请稍后重试。" });
         return;
       }
-
-      setMessage({ type: "success", text: "Login successful. Redirecting..." });
-      router.push("/dashboard");
-      router.refresh();
+      if (!["/admin", "/broker", "/dashboard"].includes(result.destination)) throw new Error("登录返回了无效的后台地址，请重试。");
+      // Set-Cookie from the same-origin response is committed before this full navigation.
+      window.location.replace(result.destination);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unable to log in.";
+        error instanceof Error && ["TimeoutError", "AbortError", "TypeError"].includes(error.name) ? "登录连接超时或中断，请检查网络后重试。" : "登录未完成，请稍后重试。";
 
       setMessage({ type: "error", text: errorMessage });
     } finally {
@@ -78,10 +76,16 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Log in to access your domain intelligence dashboard.">
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Log in to access your domain intelligence dashboard."
+    >
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-slate-700"
+          >
             Email
           </label>
           <input
@@ -96,7 +100,10 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-slate-700"
+          >
             Password
           </label>
           <input
@@ -132,7 +139,10 @@ export default function LoginPage() {
       </form>
       <p className="mt-6 text-center text-sm text-slate-600">
         New to hi.domains?{" "}
-        <Link href="/signup" className="font-semibold text-teal-700 hover:text-teal-800">
+        <Link
+          href="/signup"
+          className="font-semibold text-teal-700 hover:text-teal-800"
+        >
           Create an account
         </Link>
       </p>

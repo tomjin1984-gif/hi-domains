@@ -1,6 +1,6 @@
 import "server-only";
 
-import { openai } from "@/lib/ai/openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { createDomainAnalysisPrompt } from "@/lib/ai/prompt";
 
 export interface DomainAnalyzerResult {
@@ -129,7 +129,7 @@ export async function analyzeDomain(domain: string): Promise<DomainAnalyzerResul
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

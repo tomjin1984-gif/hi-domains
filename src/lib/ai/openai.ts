@@ -12,6 +12,9 @@ function getOpenAIApiKey(): string {
   return apiKey;
 }
 
-export const openai = new OpenAI({
-  apiKey: getOpenAIApiKey(),
-});
+// Initialize only when analysis is requested so other workspaces do not require AI credentials.
+let client: OpenAI | undefined;
+export function getOpenAI() {
+  client ??= new OpenAI({ apiKey: getOpenAIApiKey() });
+  return client;
+}
