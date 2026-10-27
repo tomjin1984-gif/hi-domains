@@ -50,6 +50,10 @@
 
 ## 配置与运行
 
+登录通过本站 `/api/auth/login` 写入服务端会话 Cookie，然后执行完整页面跳转，避免浏览器 Cookie 与客户端路由缓存的时序问题。接口拒绝跨站请求，连接失败有明确提示并设有超时。
+
+本地 `npm run dev` / `npm start` 使用启动脚本，在 macOS 上只读检测现有系统 HTTPS 代理；支持环境代理的 Node（建议 Node 24）会自动使用它，解决浏览器可访问 Supabase 但 Node 直连被重置的问题。不会改动系统设置或关闭 TLS 校验；线上没有配置代理时保持直连。
+
 复制 `.env.example` 到 `.env.local`，填写 Supabase URL 和 publishable key。`OPENAI_API_KEY` 仅 AI 分析需要，后台管理不依赖它；OpenAI 客户端改为按请求初始化。
 
 旧项目 Supabase 检查器仍有注册触发器公开执行授权、密码保护未开启等历史提示，本次新建私有权限函数没有新增此类提示。不要为解决后台访问错误关闭 RLS。

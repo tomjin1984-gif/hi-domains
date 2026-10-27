@@ -3,9 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AuthLayout } from "@/components/site-shell";
-import { createClient } from "@/lib/supabase/client";
 
 type AuthMessage = {
   type: "error" | "success";
@@ -33,7 +31,6 @@ function validateLoginForm(email: string, password: string): string | null {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<AuthMessage>(null);
@@ -53,39 +50,24 @@ export default function LoginPage() {
     setMessage(null);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        signal: AbortSignal.timeout(40_000),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
-
-      if (error) {
-        setMessage({ type: "error", text: error.message });
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage({ type: "error", text: result.error ?? "登录失败，请稍后重试。" });
         return;
       }
-
-      setMessage({ type: "success", text: "Login successful. Redirecting..." });
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const { data: access } = user
-        ? await supabase
-            .from("staff_access")
-            .select("role,active")
-            .eq("user_id", user.id)
-            .maybeSingle()
-        : { data: null };
-      router.push(
-        access?.active && access.role === "admin"
-          ? "/admin"
-          : access?.active && access.role === "broker"
-            ? "/broker"
-            : "/dashboard",
-      );
-      router.refresh();
+      if (!["/admin", "/broker", "/dashboard"].includes(result.destination)) throw new Error("登录返回了无效的后台地址，请重试。");
+      // Set-Cookie from the same-origin response is committed before this full navigation.
+      window.location.replace(result.destination);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unable to log in.";
+        error instanceof Error && ["TimeoutError", "AbortError", "TypeError"].includes(error.name) ? "登录连接超时或中断，请检查网络后重试。" : "登录未完成，请稍后重试。";
 
       setMessage({ type: "error", text: errorMessage });
     } finally {
