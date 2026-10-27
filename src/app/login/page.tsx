@@ -65,7 +65,23 @@ export default function LoginPage() {
       }
 
       setMessage({ type: "success", text: "Login successful. Redirecting..." });
-      router.push("/dashboard");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: access } = user
+        ? await supabase
+            .from("staff_access")
+            .select("role,active")
+            .eq("user_id", user.id)
+            .maybeSingle()
+        : { data: null };
+      router.push(
+        access?.active && access.role === "admin"
+          ? "/admin"
+          : access?.active && access.role === "broker"
+            ? "/broker"
+            : "/dashboard",
+      );
       router.refresh();
     } catch (error) {
       const errorMessage =
@@ -78,10 +94,16 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Log in to access your domain intelligence dashboard.">
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Log in to access your domain intelligence dashboard."
+    >
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-slate-700"
+          >
             Email
           </label>
           <input
@@ -96,7 +118,10 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-slate-700"
+          >
             Password
           </label>
           <input
@@ -132,7 +157,10 @@ export default function LoginPage() {
       </form>
       <p className="mt-6 text-center text-sm text-slate-600">
         New to hi.domains?{" "}
-        <Link href="/signup" className="font-semibold text-teal-700 hover:text-teal-800">
+        <Link
+          href="/signup"
+          className="font-semibold text-teal-700 hover:text-teal-800"
+        >
           Create an account
         </Link>
       </p>

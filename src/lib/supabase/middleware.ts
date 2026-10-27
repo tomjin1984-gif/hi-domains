@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/admin", "/broker", "/orders"];
 const authRoutes = ["/login", "/signup"];
 
 function isRouteMatch(pathname: string, routes: string[]) {
